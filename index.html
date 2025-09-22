@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>矿业新闻 Mining News</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2d567c;
+            --accent: #d99a22;
+            --light: #f5f7fb;
+            --text: #1b1f29;
+            --muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans SC", "Segoe UI", sans-serif;
+            background: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        #lang-cn,
+        #lang-en {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid rgba(30, 58, 95, 0.08);
+            box-shadow: 0 4px 16px rgba(30, 58, 95, 0.08);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.08em;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--muted);
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            padding-bottom: 0.25rem;
+        }
+
+        nav a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        nav a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .language-switch {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .language-switch label {
+            cursor: pointer;
+            color: var(--muted);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        #lang-cn:checked ~ .page label[for="lang-cn"],
+        #lang-en:checked ~ .page label[for="lang-en"] {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .banner {
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.95), rgba(45, 86, 124, 0.9)), url("https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?auto=format&fit=crop&w=1600&q=80") center/cover;
+            color: #fff;
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .banner h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .banner p {
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 1.25rem;
+        }
+
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 12px 24px rgba(217, 154, 34, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 32px rgba(217, 154, 34, 0.4);
+        }
+
+        .banner-stats {
+            display: grid;
+            gap: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .banner-stats div {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .news-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .news-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 16px 32px rgba(30, 58, 95, 0.08);
+            border: 1px solid rgba(30, 58, 95, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 40px rgba(30, 58, 95, 0.12);
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .news-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-summary {
+            color: var(--muted);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .category-card,
+        .ad-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 16px 32px rgba(30, 58, 95, 0.08);
+            border: 1px solid rgba(30, 58, 95, 0.06);
+        }
+
+        .category-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted);
+        }
+
+        .category-item span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .ad-card {
+            background: linear-gradient(145deg, rgba(217, 154, 34, 0.9), rgba(255, 200, 87, 0.85));
+            color: #1f2937;
+        }
+
+        .ad-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .ad-card p {
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background: #0f172a;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .lang-en {
+            display: none;
+        }
+
+        #lang-en:checked ~ .page .lang-cn {
+            display: none !important;
+        }
+
+        #lang-en:checked ~ .page .lang-en {
+            display: inline;
+        }
+
+        #lang-cn:checked ~ .page .lang-en {
+            display: none;
+        }
+
+        @media (max-width: 960px) {
+            header {
+                position: static;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 1rem;
+            }
+
+            .banner {
+                padding: 2rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .language-switch {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <input type="radio" name="language" id="lang-cn" checked>
+    <input type="radio" name="language" id="lang-en">
+    <div class="page">
+        <header>
+            <div class="top-bar">
+                <div class="logo">
+                    <span class="lang-cn">矿业智讯</span>
+                    <span class="lang-en">Mining Insight</span>
+                </div>
+                <div class="language-switch">
+                    <span class="lang-cn">语言</span>
+                    <span class="lang-en">Language</span>
+                    <label for="lang-cn">中文</label>
+                    <label for="lang-en">English</label>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#"><span class="lang-cn">行业动态</span><span class="lang-en">Industry Updates</span></a></li>
+                    <li><a href="#"><span class="lang-cn">市场数据</span><span class="lang-en">Market Data</span></a></li>
+                    <li><a href="#"><span class="lang-cn">政策法规</span><span class="lang-en">Policy &amp; Regulation</span></a></li>
+                    <li><a href="#"><span class="lang-cn">科技创新</span><span class="lang-en">Technology</span></a></li>
+                    <li><a href="#"><span class="lang-cn">可持续发展</span><span class="lang-en">Sustainability</span></a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="banner">
+                <div>
+                    <h1>
+                        <span class="lang-cn">全球矿业趋势与深度洞察</span>
+                        <span class="lang-en">Global Mining Trends &amp; Deep Insights</span>
+                    </h1>
+                    <p>
+                        <span class="lang-cn">实时跟踪关键矿种价格、重大项目进展与行业政策，为决策者提供可信赖的信息中心。</span>
+                        <span class="lang-en">Track commodity prices, project milestones, and regulatory shifts in real time to empower confident decisions.</span>
+                    </p>
+                    <a class="cta" href="#">
+                        <span class="lang-cn">查看今日焦点</span>
+                        <span class="lang-en">View Today's Highlights</span>
+                    </a>
+                </div>
+                <div class="banner-stats">
+                    <div>
+                        <strong>12</strong>
+                        <div>
+                            <span class="lang-cn">重点矿区实时监测</span>
+                            <span class="lang-en">Key mining regions monitored</span>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>48</strong>
+                        <div>
+                            <span class="lang-cn">小时内重大新闻</span>
+                            <span class="lang-en">Major stories in 48 hours</span>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>7</strong>
+                        <div>
+                            <span class="lang-cn">深度专题分析</span>
+                            <span class="lang-en">In-depth analytical features</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div>
+                    <h2 class="section-title">
+                        <span class="lang-cn">最新新闻</span>
+                        <span class="lang-en">Latest Headlines</span>
+                    </h2>
+                    <div class="news-list">
+                        <article class="news-card">
+                            <div class="news-meta">
+                                <span>08:30</span>
+                                <span class="lang-cn">铜业</span>
+                                <span class="lang-en">Copper</span>
+                            </div>
+                            <h3 class="news-title">
+                                <span class="lang-cn">智利北部大型铜矿扩建项目获批</span>
+                                <span class="lang-en">Major Copper Expansion Approved in Northern Chile</span>
+                            </h3>
+                            <p class="news-summary">
+                                <span class="lang-cn">国家矿业委员会表示，新项目将提升年产能 18%，并新增智能化选矿线以降低用水量。</span>
+                                <span class="lang-en">The national mining council confirmed an 18% capacity boost with new smart concentrators designed to reduce water consumption.</span>
+                            </p>
+                        </article>
+                        <article class="news-card">
+                            <div class="news-meta">
+                                <span>07:50</span>
+                                <span class="lang-cn">能源</span>
+                                <span class="lang-en">Energy</span>
+                            </div>
+                            <h3 class="news-title">
+                                <span class="lang-cn">澳大利亚锂矿商宣布与电池巨头建立长期供应协议</span>
+                                <span class="lang-en">Australian Lithium Miner Signs Long-Term Battery Supply Deal</span>
+                            </h3>
+                            <p class="news-summary">
+                                <span class="lang-cn">协议覆盖未来五年高品位锂辉石供货，并计划共同开发可持续采选技术。</span>
+                                <span class="lang-en">The five-year agreement covers premium spodumene supply and joint development of sustainable extraction technology.</span>
+                            </p>
+                        </article>
+                        <article class="news-card">
+                            <div class="news-meta">
+                                <span>06:15</span>
+                                <span class="lang-cn">铁矿</span>
+                                <span class="lang-en">Iron Ore</span>
+                            </div>
+                            <h3 class="news-title">
+                                <span class="lang-cn">巴西铁矿石发运量创年内新高</span>
+                                <span class="lang-en">Brazilian Iron Ore Shipments Hit Annual High</span>
+                            </h3>
+                            <p class="news-summary">
+                                <span class="lang-cn">受亚洲市场需求回暖推动，主要港口本周发运量突破 3200 万吨。</span>
+                                <span class="lang-en">Reviving Asian demand pushed weekly shipments beyond 32 million tonnes across major ports.</span>
+                            </p>
+                        </article>
+                    </div>
+                </div>
+                <aside class="sidebar">
+                    <div class="category-card">
+                        <h2 class="section-title">
+                            <span class="lang-cn">新闻分类</span>
+                            <span class="lang-en">Categories</span>
+                        </h2>
+                        <div class="category-list">
+                            <div class="category-item">
+                                <span>
+                                    <span class="lang-cn">有色金属</span>
+                                    <span class="lang-en">Non-ferrous Metals</span>
+                                </span>
+                                <small>24</small>
+                            </div>
+                            <div class="category-item">
+                                <span>
+                                    <span class="lang-cn">稀土与新能源</span>
+                                    <span class="lang-en">Rare Earth &amp; New Energy</span>
+                                </span>
+                                <small>18</small>
+                            </div>
+                            <div class="category-item">
+                                <span>
+                                    <span class="lang-cn">煤炭能源</span>
+                                    <span class="lang-en">Coal &amp; Energy</span>
+                                </span>
+                                <small>15</small>
+                            </div>
+                            <div class="category-item">
+                                <span>
+                                    <span class="lang-cn">装备与技术</span>
+                                    <span class="lang-en">Equipment &amp; Tech</span>
+                                </span>
+                                <small>12</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ad-card">
+                        <h3>
+                            <span class="lang-cn">矿业峰会 2024 · 北京</span>
+                            <span class="lang-en">Mining Summit 2024 · Beijing</span>
+                        </h3>
+                        <p>
+                            <span class="lang-cn">与全球矿业领袖探讨可持续未来，提前报名享早鸟优惠。</span>
+                            <span class="lang-en">Join global leaders to shape sustainable mining. Early bird registration now open.</span>
+                        </p>
+                        <a class="cta" href="#">
+                            <span class="lang-cn">立即注册</span>
+                            <span class="lang-en">Register Now</span>
+                        </a>
+                    </div>
+                </aside>
+            </section>
+        </main>
+
+        <footer>
+            <span class="lang-cn">© 2024 矿业智讯。版权所有。</span>
+            <span class="lang-en">© 2024 Mining Insight. All rights reserved.</span>
+        </footer>
+    </div>
+</body>
+</html>
